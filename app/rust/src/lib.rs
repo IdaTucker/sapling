@@ -24,7 +24,7 @@ use core::panic::PanicInfo;
 use jubjub::{AffineNielsPoint, AffinePoint, ExtendedNielsPoint, ExtendedPoint, Fq, Fr};
 pub use zxformat::{fpi64_to_str, fpu64_to_str};
 
-use crate::bolos::{c_check_app_canary, c_zemu_log_stack};
+use crate::bolos::c_check_app_canary;
 
 mod bolos;
 mod commitments;

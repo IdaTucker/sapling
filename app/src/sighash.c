@@ -116,7 +116,6 @@ void shielded_spend_hash(const uint8_t *input, uint16_t inputlen, uint8_t *outpu
 }
 
 static void signature_hash_v4(const uint8_t *input, uint16_t inputlen, uint8_t *output) {
-    zemu_log_stack("signature_hash_v4");
     cx_blake2b_t ctx;
 
     uint8_t personalization[16] = {0};
@@ -129,7 +128,6 @@ static void signature_hash_v4(const uint8_t *input, uint16_t inputlen, uint8_t *
 }
 
 static void signature_hash_v5(const uint8_t *input, uint8_t *start_signdata, uint8_t index, signable_input type, uint8_t *output) {
-    zemu_log_stack("signature_hash_v5");
     cx_blake2b_t ctx;
 
     uint8_t personalization[16] = {0};

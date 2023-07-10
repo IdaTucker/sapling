@@ -103,8 +103,6 @@ zxerr_t crypto_fillAddress_secp256k1(uint8_t *buffer, uint16_t buffer_len, uint1
         return zxerr_unknown;
     }
 
-    zemu_log_stack("crypto_fillAddress_secp256k1");
-
     MEMZERO(buffer, buffer_len);
     answer_t *const answer = (answer_t *) buffer;
 
@@ -183,7 +181,6 @@ zxerr_t crypto_extractPublicKey(const uint32_t path[HDPATH_LEN_DEFAULT], uint8_t
 }
 
 zxerr_t crypto_fillSaplingSeed(uint8_t *sk) {
-    zemu_log_stack("crypto_fillSaplingSeed");
 
     // Get seed from Ed25519
     zxerr_t error = zxerr_ok;
@@ -222,7 +219,6 @@ zxerr_t crypto_fillSaplingSeed(uint8_t *sk) {
 
 // handleInitTX step 1/2
 zxerr_t crypto_extracttx_sapling(uint8_t *buffer, uint16_t bufferLen, const uint8_t *txdata, const uint16_t txdatalen) {
-    zemu_log_stack("crypto_extracttx_sapling");
     MEMZERO(buffer, bufferLen);
     uint8_t t_in_len = *txdata;
     uint8_t t_out_len = *(txdata + 1);
@@ -475,7 +471,6 @@ zxerr_t crypto_extract_output_rnd(uint8_t *buffer, uint16_t bufferLen, uint16_t 
 
 // handleCheckandSign step 1/11
 zxerr_t crypto_check_prevouts(uint8_t *buffer, uint16_t bufferLen, const uint8_t *txdata, const uint8_t tx_version){
-    zemu_log_stack("crypto_check_prevouts");
     MEMZERO(buffer, bufferLen);
 
     if(get_state() != STATE_CHECKING_ALL_TXDATA){
@@ -502,7 +497,6 @@ zxerr_t crypto_check_prevouts(uint8_t *buffer, uint16_t bufferLen, const uint8_t
 
 // handleCheckandSign step 2/11
 zxerr_t crypto_check_sequence(uint8_t *buffer, uint16_t bufferLen, const uint8_t *txdata, const uint8_t tx_version){
-    zemu_log_stack("crypto_check_sequence");
     MEMZERO(buffer, bufferLen);
 
     if(get_state() != STATE_CHECKING_ALL_TXDATA){
@@ -532,7 +526,6 @@ zxerr_t crypto_check_sequence(uint8_t *buffer, uint16_t bufferLen, const uint8_t
 
 // handleCheckandSign step 3/11
 zxerr_t crypto_check_outputs(uint8_t *buffer, uint16_t bufferLen, const uint8_t *txdata, const uint16_t txdatalen, const uint8_t tx_version){
-    zemu_log_stack("crypto_check_outputs");
     if(start_sighashdata() +  SAPLING_LENGTH_HASH_DATA != txdatalen){
         return zxerr_unknown;
     }
@@ -567,7 +560,6 @@ zxerr_t crypto_check_outputs(uint8_t *buffer, uint16_t bufferLen, const uint8_t 
 // handleCheckandSign step 4/11
 zxerr_t crypto_check_joinsplits(uint8_t *buffer, uint16_t bufferLen, const uint8_t *txdata, const uint8_t tx_version){
     if (tx_version == TX_VERSION_SAPLING){
-        zemu_log_stack("crypto_check_joinsplits");
         MEMZERO(buffer, bufferLen);
 
         if(get_state() != STATE_CHECKING_ALL_TXDATA){
@@ -585,7 +577,6 @@ zxerr_t crypto_check_joinsplits(uint8_t *buffer, uint16_t bufferLen, const uint8
 
 // handleCheckandSign step 5/11
 zxerr_t crypto_check_valuebalance(uint8_t *buffer, uint16_t bufferLen, const uint8_t *txdata, const uint8_t tx_version){
-    zemu_log_stack("crypto_check_valuebalance");
     MEMZERO(buffer, bufferLen);
 
     if(get_state() != STATE_CHECKING_ALL_TXDATA){
@@ -668,7 +659,6 @@ typedef struct {
 
 // handleCheckandSign step 6/11
 zxerr_t crypto_checkspend_sapling(uint8_t *buffer, uint16_t bufferLen, const uint8_t *txdata, const uint16_t txdatalen, const uint8_t tx_version) {
-    zemu_log_stack("crypto_checkspend_sapling");
     MEMZERO(buffer, bufferLen);
 
     size_t length_hash_data = (tx_version==TX_VERSION_SAPLING)?SAPLING_LENGTH_HASH_DATA:NU5_LENGTH_HASH_DATA;
@@ -811,7 +801,6 @@ typedef struct {
 
 // handleCheckandSign step 7/11
 zxerr_t crypto_checkoutput_sapling(uint8_t *buffer, uint16_t bufferLen, const uint8_t *txdata, const uint16_t txdatalen, const uint8_t tx_version) {
-    zemu_log_stack("crypto_checkoutput_sapling");
     MEMZERO(buffer, bufferLen);
 
     if(get_state() != STATE_CHECKING_ALL_TXDATA){
@@ -826,7 +815,6 @@ zxerr_t crypto_checkoutput_sapling(uint8_t *buffer, uint16_t bufferLen, const ui
 
     uint8_t *start_outputdata = (uint8_t *) (txdata + length_t_in_data() + length_spenddata());
 
-    zemu_log_stack("crypto_checkoutput_sapling");
 
     uint8_t *out = (uint8_t *) buffer;
     MEMZERO(out, bufferLen);
@@ -970,7 +958,6 @@ typedef struct {
 
 // handleCheckandSign step 8/11
 zxerr_t crypto_checkencryptions_sapling(uint8_t *buffer, uint16_t bufferLen, const uint8_t *txdata) {
-    zemu_log_stack("crypto_checkencryptions_sapling");
     MEMZERO(buffer, bufferLen);
 
     tmp_enc *tmp = (tmp_enc *)buffer;
@@ -1103,7 +1090,6 @@ typedef struct {
 
 // handleCheckandSign step 9/11
 zxerr_t crypto_sign_and_check_transparent(uint8_t *buffer, uint16_t bufferLen, const uint8_t *txdata, const uint16_t txdatalen, const uint8_t tx_version) {
-    zemu_log_stack("crypto_sign_and_check_transparent");
     if(t_inlist_len() == 0){
         return zxerr_ok;
     }
@@ -1240,7 +1226,6 @@ typedef struct {
 
 // handleCheckandSign step 10/11
 zxerr_t crypto_signspends_sapling(uint8_t *buffer, uint16_t bufferLen, const uint8_t *txdata, const uint16_t txdatalen, const uint8_t tx_version) {
-    zemu_log_stack("crypto_signspends_sapling");
     if(spendlist_len() == 0){
         return zxerr_ok;
     }
@@ -1359,8 +1344,6 @@ typedef struct {
 zxerr_t crypto_ivk_sapling(uint8_t *buffer, uint16_t bufferLen, uint32_t p, uint16_t *replyLen) {
     MEMZERO(buffer, bufferLen);
 
-    zemu_log_stack("crypto_ivk_sapling");
-
     tmp_sapling_ivk_and_default_div *out = (tmp_sapling_ivk_and_default_div *) buffer;
     MEMZERO(out, bufferLen);
 
@@ -1402,7 +1385,6 @@ zxerr_t crypto_ivk_sapling(uint8_t *buffer, uint16_t bufferLen, uint32_t p, uint
 zxerr_t crypto_ovk_sapling(uint8_t *buffer, uint16_t bufferLen, uint32_t p, uint16_t *replyLen){
     MEMZERO(buffer, bufferLen);
 
-    zemu_log_stack("crypto_ovk_sapling");
     uint8_t zip32_seed[ZIP32_SEED_SIZE] = {0};
 
     zxerr_t error = zxerr_ok;
@@ -1440,9 +1422,6 @@ typedef struct {
 
 // handleGetKeyFVK: return the full viewing key for a given path
 zxerr_t crypto_fvk_sapling(uint8_t *buffer, uint16_t bufferLen, uint32_t p, uint16_t *replyLen) {
-
-    zemu_log_stack("crypto_fvk_sapling");
-
     MEMZERO(buffer, bufferLen);
     tmp_sapling_fvk *out = (tmp_sapling_fvk *) buffer;
 
@@ -1482,7 +1461,6 @@ zxerr_t crypto_fvk_sapling(uint8_t *buffer, uint16_t bufferLen, uint32_t p, uint
 // handleGetNullifier
 zxerr_t crypto_nullifier_sapling(uint8_t *buffer, uint16_t bufferLen, uint64_t notepos, uint8_t *cm,
                                  uint16_t *replyLen){
-    zemu_log_stack("crypto_nullifier_sapling");
 
     MEMZERO(buffer, bufferLen);
 
@@ -1523,7 +1501,6 @@ zxerr_t crypto_nullifier_sapling(uint8_t *buffer, uint16_t bufferLen, uint64_t n
 
 // handleGetDiversifierList
 zxerr_t crypto_diversifier_with_startindex(uint8_t *buffer, uint32_t p, const uint8_t *startindex, uint16_t *replylen) {
-    zemu_log_stack("crypto_get_diversifiers_sapling");
 
     //the path in zip32 is [FIRST_VALUE, COIN_TYPE, p] where p is u32 and last part of hdPath
     uint8_t zip32_seed[ZIP32_SEED_SIZE] = {0};
@@ -1578,8 +1555,6 @@ zxerr_t crypto_fillAddress_with_diversifier_sapling(uint8_t *buffer, uint16_t bu
     }
 
     MEMZERO(buffer, bufferLen);
-
-    zemu_log_stack("crypto_fillAddress_with_div_sapling");
 
     tmp_buf_addr_s *const out = (tmp_buf_addr_s *) buffer;
     MEMZERO(out, bufferLen);
@@ -1643,7 +1618,6 @@ zxerr_t crypto_fillAddress_sapling(uint8_t *buffer, uint16_t bufferLen, uint32_t
 
     MEMZERO(buffer, bufferLen);
 
-    zemu_log_stack("crypto_fillAddress_sapling");
 
     tmp_buf_addr_s *const out = (tmp_buf_addr_s *) buffer;
     MEMZERO(out, bufferLen);

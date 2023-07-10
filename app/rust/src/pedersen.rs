@@ -2,8 +2,6 @@ use core::convert::TryInto;
 use core::mem;
 use jubjub::{AffineNielsPoint, AffinePoint, ExtendedPoint, Fq, Fr};
 
-use crate::bolos::c_zemu_log_stack;
-
 #[inline(never)]
 fn handle_chunk(bits: u8, cur: &mut Fr, acc: &mut Fr) {
     let c = bits & 1;

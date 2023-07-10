@@ -37,7 +37,6 @@
 #define SIGHASH_ALL     0x01
 
 void nu5_transparent_prevouts_hash(const uint8_t *input, uint8_t *output) {
-    zemu_log_stack("nu5_transparent_prevouts_hash\n");
     const uint8_t n = t_inlist_len();
     cx_blake2b_t ctx;
     uint8_t personalization[16] = {0};
@@ -58,7 +57,6 @@ void nu5_transparent_prevouts_hash(const uint8_t *input, uint8_t *output) {
 }
 
 void nu5_transparent_sequence_hash(const uint8_t *input, uint8_t *output) {
-    zemu_log_stack("nu5_transparent_sequence_hash");
 
     const uint8_t n = t_inlist_len();
 
@@ -120,7 +118,6 @@ void nu5_transparent_outputs_hash(uint8_t *output) {
 /// Then, hash these together personalized by ZCASH_SAPLING_SPENDS_HASH_PERSONALIZATION
 void nu5_hash_sapling_spends(const uint8_t *input, uint8_t *output)
 {
-    zemu_log_stack("nu5_hash_sapling_spends");
     const uint8_t n = spendlist_len();
 
     cx_blake2b_t ctx;
@@ -181,7 +178,6 @@ void nu5_hash_sapling_spends(const uint8_t *input, uint8_t *output)
 ///
 /// Then, hash these together personalized with ZCASH_SAPLING_OUTPUTS_HASH_PERSONALIZATION
 void nu5_hash_sapling_outputs(const uint8_t *input, uint8_t *output){
-    zemu_log_stack("nu5_hash_sapling_outputs");
     const uint8_t n = outputlist_len();
 
     cx_blake2b_t ctx;
@@ -263,7 +259,6 @@ void nu5_hash_sapling_outputs(const uint8_t *input, uint8_t *output){
 /// prevout and sequence_hash components of txid
 
 void hash_header_txid_data(const uint8_t *input, uint8_t *output){
-    zemu_log_stack("hash_header_txid_data");
     cx_blake2b_t ctx;
     uint8_t personalization[16] = {0};
     MEMCPY(personalization, PIC(ZCASH_HEADERS_HASH_PERSONALIZATION), 16);
@@ -284,7 +279,6 @@ void hash_header_txid_data(const uint8_t *input, uint8_t *output){
 }
 
 void hash_transparent_txid_data(const uint8_t *input, uint8_t *output) {
-    zemu_log_stack("hash_transparent_txid_data");
     cx_blake2b_t ctx;
     uint8_t personalization[16] = {0};
     MEMCPY(personalization, PIC(ZCASH_TRANSPARENT_HASH_PERSONALIZATION), 16);
@@ -305,8 +299,6 @@ void hash_transparent_txid_data(const uint8_t *input, uint8_t *output) {
 }
 
 void transparent_sig_digest(const uint8_t *input, uint8_t *start_signdata, uint8_t index,signable_input type, uint8_t *output) {
-    zemu_log_stack("transparent_sig_digest");
-
     if (t_inlist_len()==0){
         hash_transparent_txid_data(start_signdata,output);
     }
@@ -387,7 +379,6 @@ void transparent_sig_digest(const uint8_t *input, uint8_t *start_signdata, uint8
 }
 
 void hash_sapling_txid_data(const uint8_t *input, uint8_t *output) {
-    zemu_log_stack("hash_sapling_txid_data");
     cx_blake2b_t ctx;
     uint8_t personalization[16] = {0};
     MEMCPY(personalization, PIC(ZCASH_SAPLING_HASH_PERSONALIZATION), 16);

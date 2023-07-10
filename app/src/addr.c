@@ -24,7 +24,6 @@
 #include "actions.h"
 
 zxerr_t addr_getNumItems(uint8_t *num_items) {
-    zemu_log_stack("addr_getNumItems");
     *num_items = 1;
     if (app_mode_expert()) {
         *num_items = 2;
@@ -36,8 +35,6 @@ zxerr_t addr_getItem(int8_t displayIdx,
                      char *outKey, uint16_t outKeyLen,
                      char *outVal, uint16_t outValLen,
                      uint8_t pageIdx, uint8_t *pageCount) {
-    ZEMU_LOGF(200, "[addr_getItem] %d/%d\n", displayIdx, pageIdx)
-
     switch (displayIdx) {
         case 0:
             switch (action_addrResponse.kind) {

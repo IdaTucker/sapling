@@ -5,7 +5,7 @@ use group::{Group, GroupEncoding};
 use jubjub::{AffinePoint, Fr};
 use rand::RngCore;
 
-use crate::bolos::{c_zemu_log_stack, Trng};
+use crate::bolos::Trng;
 use crate::commitments::bytes_to_extended;
 use crate::constants;
 use crate::zip32::*;

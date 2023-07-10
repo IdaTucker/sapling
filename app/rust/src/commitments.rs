@@ -2,7 +2,6 @@ use blake2s_simd::Params as Blake2sParams;
 use byteorder::LittleEndian;
 use jubjub::{AffineNielsPoint, AffinePoint, ExtendedPoint, Fq, Fr};
 
-use crate::bolos::c_zemu_log_stack;
 use crate::pedersen::*;
 use crate::redjubjub::*;
 use crate::zeccrypto::prf_ock;
@@ -144,7 +143,6 @@ pub fn shiftsixbits(input: &mut [u8; 73]) {
 
 #[inline(never)]
 pub fn note_commitment(v: u64, g_d: &[u8; 32], pk_d: &[u8; 32], rcm: &[u8; 32]) -> ExtendedPoint {
-    c_zemu_log_stack(b"notecommit\x00".as_ref());
     let mut input_hash = [0u8; 73];
 
     let vbytes = write_u64_tobytes(v);
@@ -266,7 +264,6 @@ pub extern "C" fn compute_nullifier(
     nsk_ptr: *const [u8; 32],
     output_ptr: *mut [u8; 32],
 ) {
-    c_zemu_log_stack(b"compute_nullifier\x00".as_ref());
     let ncm = unsafe { *ncm_ptr };
     let nsk = unsafe { &*nsk_ptr };
     let mut nk = [0u8; 32];

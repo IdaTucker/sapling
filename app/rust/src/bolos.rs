@@ -57,7 +57,6 @@ extern "C" {
     );
     fn c_zcash_blake2b_zip32master(a: *const u8, a_len: u32, out: *mut u8);
 
-    fn zemu_log_stack(buffer: *const u8);
     fn check_app_canary();
     fn zcash_blake2b_expand_seed(a: *const u8, a_len: u32, b: *const u8, b_len: u32, out: *mut u8);
     fn c_zcash_blake2b_redjubjub(a: *const u8, a_len: u32, b: *const u8, b_len: u32, out: *mut u8);
@@ -119,8 +118,6 @@ pub fn blake2b_redjubjub(a: &[u8], b: &[u8]) -> [u8; 64] {
     let result: [u8; 64] = *h.as_array();
     result
 }
-
-pub fn c_zemu_log_stack(_s: &[u8]) {}
 
 pub fn c_check_app_canary() {}
 

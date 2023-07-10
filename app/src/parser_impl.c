@@ -34,8 +34,6 @@ parser_error_t parser_init_context(parser_context_t *ctx, const uint8_t *buffer,
     ctx->buffer = buffer;
     ctx->bufferLen = bufferSize;
 
-    ZEMU_LOGF(100, "init_context %d bytes", bufferSize);
-
     return parser_ok;
 }
 

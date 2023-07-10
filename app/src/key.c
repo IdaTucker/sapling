@@ -24,7 +24,6 @@
 #include "actions.h"
 
 zxerr_t key_getNumItems(uint8_t *num_items) {
-    zemu_log_stack("key_getNumItems");
     *num_items = 1;
     if (app_mode_expert()) {
         *num_items = 2;
@@ -39,10 +38,8 @@ zxerr_t key_getItem(int8_t displayIdx,
     snprintf(outKey, outKeyLen, "?");
     snprintf(outVal, outValLen, "?");
 
-    zemu_log_stack("key_getItem");
     switch (displayIdx) {
         case 0: {
-            zemu_log_stack("case 0");
             char tmpBuffer[100];
             MEMZERO(tmpBuffer, sizeof(tmpBuffer));
             switch (key_state.kind) {
@@ -62,7 +59,6 @@ zxerr_t key_getItem(int8_t displayIdx,
                     pageString(outVal, outValLen, tmpBuffer, pageIdx, pageCount);
                     return zxerr_ok;
                 case nf:
-                    zemu_log_stack("Send NF?");
                     snprintf(outKey, outKeyLen, "Send NF?");
                     array_to_hexstr(tmpBuffer, sizeof(tmpBuffer), G_io_apdu_buffer, 32);
                     pageString(outVal, outValLen, tmpBuffer, pageIdx, pageCount);

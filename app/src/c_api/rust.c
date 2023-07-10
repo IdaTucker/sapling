@@ -102,10 +102,6 @@ uint16_t fp_uint64_to_str(char *out, uint16_t outLen, const uint64_t value, uint
 void check_canary() {
 }
 
-void _zemu_log_stack(uint8_t *buffer) {
-    zemu_log_stack((char *) buffer);
-}
-
 
 void c_aes256_encryptblock(const uint8_t *key, const uint8_t *in, uint8_t *out) {
     struct AES_ctx ctx;

@@ -83,8 +83,6 @@ parser_error_t parser_sapling_path(const uint8_t *data, size_t dataLen, uint32_t
 }
 
 void view_tx_state() {
-    uint8_t state = get_state();
-    UX_WAIT_DISPLAYED();
     return;
 }
 

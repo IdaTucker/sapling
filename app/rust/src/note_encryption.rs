@@ -2,7 +2,7 @@ use aes::block_cipher_trait::generic_array::{GenericArray, GenericArrayImplEven}
 use byteorder::{ByteOrder, LittleEndian};
 use chacha20poly1305::aead::heapless::{consts::U32, consts::*, Vec};
 
-use crate::bolos::{blake2b32_with_personalization, c_zemu_log_stack};
+use crate::bolos::blake2b32_with_personalization;
 use crate::commitments::{bytes_to_extended, bytes_to_u64, note_commitment, write_u64_tobytes};
 use crate::constants::{
     COMPACT_NOTE_SIZE, ENC_CIPHERTEXT_SIZE, ENC_COMPACT_SIZE, NOTE_PLAINTEXT_SIZE,

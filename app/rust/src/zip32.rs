@@ -25,11 +25,6 @@ use crate::pedersen::extended_to_bytes;
 use crate::{bolos, c_check_app_canary, constants};
 
 
-extern "C" {
-    fn zemu_log_stack(buffer: *const u8);
-}
-pub fn c_zemu_log_stack(_s: &[u8]) {}
-
 #[inline(always)]
 pub fn prf_expand(sk: &[u8], t: &[u8]) -> [u8; 64] {
     bolos::blake2b_expand_seed(sk, t)
@@ -64,8 +59,6 @@ pub fn sapling_nsk_to_nk(nsk: &[u8; 32]) -> [u8; 32] {
 
 #[inline(never)]
 pub fn aknk_to_ivk(ak: &[u8; 32], nk: &[u8; 32]) -> [u8; 32] {
-    c_zemu_log_stack(b"aknk_to_ivk\x00\n".as_ref());
-
     let h = Blake2sParams::new()
         .hash_length(32)
         .personal(CRH_IVK_PERSONALIZATION)
@@ -270,7 +263,6 @@ pub fn niels_multbits(p: &mut ExtendedPoint, b: &[u8; 32]) {
 #[inline(never)]
 pub fn default_pkd(ivk: &[u8; 32], d: &[u8; 11]) -> [u8; 32] {
     let h = bolos::blake2s_diversification(d);
-    c_zemu_log_stack(b"default_pkd\x00\n".as_ref());
     let mut y = bytes_to_extended(h);
     mul_by_cof(&mut y);
 
@@ -505,8 +497,6 @@ pub fn master_nsk_from_seed(seed: &[u8; 32]) -> [u8; 32] {
 
 #[inline(never)]
 pub fn derive_zip32_child_fromseedandpath(seed: &[u8; 32], path: &[u32], child_components: u8) -> [u8; 96] {
-    //ASSERT: len(path) == len(harden)
-    c_zemu_log_stack(b"derive_zip32_child\x00\n".as_ref());
     let mut tmp = master_spending_key_zip32(seed); //64
 
     // master secret key sk = tmp[..32]
@@ -584,7 +574,6 @@ pub fn derive_zip32_child_fromseedandpath(seed: &[u8; 32], path: &[u32], child_c
             result[64..96].copy_from_slice(&nk.to_bytes());
         }
         _ => {
-            c_zemu_log_stack(b"Unrecognized keys requested\x00\n".as_ref());
         }
     }
     c_check_app_canary();
@@ -633,7 +622,6 @@ pub extern "C" fn zip32_ivk(
     ivk_ptr: *mut [u8; 32],
     pos: u32,
 ) {
-    c_zemu_log_stack(b"zip32_ivk\x00\n".as_ref());
 
     let seed = unsafe { &*seed_ptr };
     let ivk = unsafe { &mut *ivk_ptr };
@@ -657,7 +645,6 @@ pub extern "C" fn get_default_diversifier_without_start_index(
     pos: u32,
     diversifier_ptr: *mut [u8; 11])
 {
-    c_zemu_log_stack(b"get_pkd_from_seed\x00\n".as_ref());
     let seed = unsafe { &*seed_ptr };
     let mut start = [0u8;11];
     let div = unsafe {&mut *diversifier_ptr};
@@ -719,7 +706,6 @@ pub extern "C" fn zip32_fvk(
     fvk_ptr: *mut [u8; 96],
     pos: u32,
 ){
-    c_zemu_log_stack(b"zip32_fvk\x00\n".as_ref());
 
     let seed = unsafe { &*seed_ptr };
     let fvk = unsafe { &mut *fvk_ptr };
@@ -816,7 +802,6 @@ pub extern "C" fn get_default_diversifier_list_withstartindex(
     start_index: *mut [u8; 11],
     diversifier_list_ptr: *mut [u8; 44],
 ) {
-    c_zemu_log_stack(b"get_default_divlist_withstartidx\x00\n".as_ref());
     let mut dk =  [0u8; 32];
     let seed = unsafe { &*seed_ptr };
     let start = unsafe { &mut *start_index };
@@ -833,7 +818,6 @@ pub extern "C" fn get_pkd_from_seed(
     diversifier_ptr: *mut [u8; 11],
     pkd_ptr: *mut [u8; 32])
 {
-    c_zemu_log_stack(b"get_pkd_from_seed\x00\n".as_ref());
     let seed = unsafe { &*seed_ptr };
     let start = unsafe { &mut *start_index };
     let div = unsafe {&mut *diversifier_ptr};
@@ -895,7 +879,6 @@ pub extern "C" fn get_pkd(
     diversifier_ptr: *const [u8; 11],
     pkd_ptr: *mut [u8; 32],
 ) {
-    c_zemu_log_stack(b"get_pkd\x00\n".as_ref());
     let ivk_ptr = &mut [0u8;32];
     let diversifier = unsafe { &*diversifier_ptr };
     let pkd = unsafe { &mut *pkd_ptr };

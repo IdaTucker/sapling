@@ -62,7 +62,7 @@ typedef enum {
 #define VIEW_ADDRESS_OFFSET_SECP256K1       PK_LEN_SECP256K1
 #define VIEW_ADDRESS_OFFSET_SAPLING         ADDR_LEN_SAPLING
 
-#define MENU_MAIN_APP_LINE1                "Zcash"
+#define MENU_MAIN_APP_LINE1                "Namada"
 #define MENU_MAIN_APP_LINE2                "Ready"
 #define APPVERSION_LINE1                   "Zcash"
 #define APPVERSION_LINE2                   ("v" APPVERSION)

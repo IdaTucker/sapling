@@ -28,13 +28,6 @@ use crate::{bolos, c_check_app_canary, constants};
 extern "C" {
     fn zemu_log_stack(buffer: *const u8);
 }
-
-#[cfg(not(test))]
-pub fn c_zemu_log_stack(s: &[u8]) {
-    unsafe { zemu_log_stack(s.as_ptr()) }
-}
-
-#[cfg(test)]
 pub fn c_zemu_log_stack(_s: &[u8]) {}
 
 #[inline(always)]
@@ -288,7 +281,7 @@ pub fn default_pkd(ivk: &[u8; 32], d: &[u8; 11]) -> [u8; 32] {
 
 #[inline(never)]
 pub fn master_spending_key_zip32(seed: &[u8; 32]) -> [u8; 64] {
-    pub const ZIP32_SAPLING_MASTER_PERSONALIZATION: &[u8; 16] = b"ZcashIP32Sapling";
+    pub const ZIP32_SAPLING_MASTER_PERSONALIZATION: &[u8; 16] = b"MASP_IP32Sapling";
     bolos::blake2b64_with_personalization(ZIP32_SAPLING_MASTER_PERSONALIZATION, seed)
 }
 

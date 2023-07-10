@@ -15,7 +15,7 @@ use crate::zip32::{default_pkd, group_hash_from_div, multwithgd, pkd_group_hash}
 #[no_mangle]
 pub extern "C" fn blake2b_prf(input_ptr: *const [u8; 128], out_ptr: *mut [u8; 32]) {
     let input = unsafe { &*input_ptr }; //ovk, cv, cmu, epk
-    pub const PRF_OCK_PERSONALIZATION: &[u8; 16] = b"Zcash_Derive_ock";
+    pub const PRF_OCK_PERSONALIZATION: &[u8; 16] = b"MASP__Derive_ock";
     let hash = blake2b32_with_personalization(PRF_OCK_PERSONALIZATION, input);
     let output = unsafe { &mut *out_ptr }; //ovk, cv, cmu, epk
     output.copy_from_slice(&hash);

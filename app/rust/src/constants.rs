@@ -74,7 +74,7 @@ pub const MAX_SIZE_BUF_ADDR:    usize = 143;
 pub const FIRSTVALUE:   u32 = 32 ^ 0x8000_0000;
 pub const COIN_TYPE:    u32 = 133 ^ 0x8000_0000;
 
-pub const CRH_IVK_PERSONALIZATION: &[u8; 8] = b"Zcashivk";
+pub const CRH_IVK_PERSONALIZATION: &[u8; 8] = b"MASP_ivk";
 
 // ZIP32 Child components
 pub const AK_NK: u8 = 0;

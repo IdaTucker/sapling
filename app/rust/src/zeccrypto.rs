@@ -51,7 +51,7 @@ pub fn kdf_sapling(dhsecret: &[u8; 32], epk: &[u8; 32]) -> [u8; 32] {
     let mut input = [0u8; 64];
     (&mut input[..32]).copy_from_slice(dhsecret);
     (&mut input[32..]).copy_from_slice(epk);
-    pub const KDF_SAPLING_PERSONALIZATION: &[u8; 16] = b"Zcash_SaplingKDF";
+    pub const KDF_SAPLING_PERSONALIZATION: &[u8; 16] = b"MASP__SaplingKDF";
     bolos::blake2b32_with_personalization(KDF_SAPLING_PERSONALIZATION, &input)
 }
 
@@ -61,13 +61,13 @@ pub fn prf_ock(ovk: &[u8; 32], cv: &[u8; 32], cmu: &[u8; 32], epk: &[u8; 32]) ->
     ock_input[32..64].copy_from_slice(cv);
     ock_input[64..96].copy_from_slice(cmu);
     ock_input[96..128].copy_from_slice(epk);
-    pub const PRF_OCK_PERSONALIZATION: &[u8; 16] = b"Zcash_Derive_ock";
+    pub const PRF_OCK_PERSONALIZATION: &[u8; 16] = b"MASP__Derive_ock";
     bolos::blake2b32_with_personalization(PRF_OCK_PERSONALIZATION, &ock_input)
 }
 
 #[inline(never)]
 pub fn prf_sessionkey(data: &[u8]) -> [u8; 32] {
-    pub const PRF_SESSION_PERSONALIZATION: &[u8; 16] = b"Zcash_SessionKey";
+    pub const PRF_SESSION_PERSONALIZATION: &[u8; 16] = b"MASP__SessionKey";
     bolos::blake2b32_with_personalization(PRF_SESSION_PERSONALIZATION, &data)
 }
 

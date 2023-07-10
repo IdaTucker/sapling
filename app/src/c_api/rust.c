@@ -8,11 +8,11 @@
 #include "coin.h"
 #include "jubjub.h"
 
-#define CTX_REDJUBJUB "Zcash_RedJubjubH"
+#define CTX_REDJUBJUB "MASP__RedJubjubH"
 #define CTX_REDJUBJUB_LEN 16
 #define CTX_REDJUBJUB_HASH_LEN 64
 
-#define CTX_EXPAND_SEED "Zcash_ExpandSeed"
+#define CTX_EXPAND_SEED "MASP__ExpandSeed"
 #define CTX_EXPAND_SEED_LEN 16
 #define CTX_EXPAND_SEED_HASH_LEN 64
 

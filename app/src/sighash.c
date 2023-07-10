@@ -24,15 +24,12 @@
 #include "index_sapling.h"
 #include "txid.h"
 
-#define  ZCASH_PREVOUTS_HASH_PERSONALIZATION "ZcashPrevoutHash"
-#define  ZCASH_SEQUENCE_HASH_PERSONALIZATION "ZcashSequencHash"
-#define  ZCASH_OUTPUTS_HASH_PERSONALIZATION "ZcashOutputsHash"
-//#define  ZCASH_JOINSPLITS_HASH_PERSONALIZATION "ZcashJSplitsHash" not supported
-#define CTX_ZCASH_SHIELDED_SPENDS_HASH_PERSONALIZATION "ZcashSSpendsHash"
-#define CTX_ZCASH_SHIELDED_OUTPUTS_HASH_PERSONALIZATION "ZcashSOutputHash"
+#define  ZCASH_PREVOUTS_HASH_PERSONALIZATION "MASP_PrevoutHash"
+#define  ZCASH_SEQUENCE_HASH_PERSONALIZATION "MASP_SequencHash"
+#define  ZCASH_OUTPUTS_HASH_PERSONALIZATION "MASP_OutputsHash"
+#define CTX_ZCASH_SHIELDED_SPENDS_HASH_PERSONALIZATION "MASP_SSpendsHash"
+#define CTX_ZCASH_SHIELDED_OUTPUTS_HASH_PERSONALIZATION "MASP_SOutputHash"
 
-//const uint8_t CONSENSUS_BRANCH_ID_SAPLING[4] = {0x76, 0xb8, 0x09, 0xBB};       // sapling
-//const uint8_t CONSENSUS_BRANCH_ID_ORCHARD[4] = {0xC2, 0xD6, 0xD0, 0xB4};       // orchard
 //
 const uint8_t CONSENSUS_BRANCH_ID_SAPLING[4] = {0xBB, 0x09, 0xB8, 0x76};       // sapling
 const uint8_t CONSENSUS_BRANCH_ID_ORCHARD[4] = {0xB4, 0xD0, 0xD6, 0xC2};       // orchard
@@ -123,7 +120,7 @@ static void signature_hash_v4(const uint8_t *input, uint16_t inputlen, uint8_t *
     cx_blake2b_t ctx;
 
     uint8_t personalization[16] = {0};
-    MEMCPY(personalization, "ZcashSigHash", 12);
+    MEMCPY(personalization, "MASP_SigHash", 12);
     MEMCPY(personalization + 12, CONSENSUS_BRANCH_ID_ORCHARD, 4);
 
     cx_blake2b_init2(&ctx, 256, NULL, 0, (uint8_t *) personalization, 16);
@@ -136,7 +133,7 @@ static void signature_hash_v5(const uint8_t *input, uint8_t *start_signdata, uin
     cx_blake2b_t ctx;
 
     uint8_t personalization[16] = {0};
-    MEMCPY(personalization, "ZcashTxHash_", 12);
+    MEMCPY(personalization, "MASP_TxHash_", 12);
     MEMCPY(personalization + 12, CONSENSUS_BRANCH_ID_ORCHARD, 4);
     cx_blake2b_init2(&ctx, 256, NULL, 0, (uint8_t *) personalization, 16);
 
@@ -170,7 +167,7 @@ static void signature_script_hash_v4(const uint8_t *input, uint16_t inputlen, ui
     cx_blake2b_t ctx;
 
 	uint8_t personalization[16] = {0};
-    MEMCPY(personalization, "ZcashSigHash", 12);
+    MEMCPY(personalization, "MASP_SigHash", 12);
     MEMCPY(personalization + 12, CONSENSUS_BRANCH_ID_ORCHARD, 4);
 
     cx_blake2b_init2(&ctx, 256, NULL, 0, (uint8_t *) personalization, 16);

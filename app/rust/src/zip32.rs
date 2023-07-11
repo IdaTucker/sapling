@@ -72,17 +72,18 @@ pub extern "C" fn sapling_derive_dummy_ask_and_nsk(
     nsk_out.copy_from_slice(&nsk.to_bytes())
 }
 
-#[inline(never)]
-pub fn sapling_ask_to_ak(ask: &[u8; 32]) -> [u8; 32] {
+#[no_mangle]
+pub extern "C" fn sapling_ask_to_ak(ask: &[u8; 32], ak_out: &mut [u8; 32]) {
     let mut point = [0u8; 32];
     bolos::sdk_jubjub_scalarmult_spending_base(&mut point, &ask[..]);
-    point
+    ak_out.copy_from_slice(&point);
 }
 
-#[inline(never)]
-pub fn sapling_nsk_to_nk(nsk: &[u8; 32]) -> [u8; 32] {
+#[no_mangle]
+pub extern "C" fn sapling_nsk_to_nk(nsk: &[u8; 32], nk_out: &mut [u8; 32]) {
     let nk = PROVING_KEY_BASE.multiply_bits(&nsk);
-    AffinePoint::from(nk).to_bytes()
+    let point = AffinePoint::from(nk).to_bytes();
+    nk_out.copy_from_slice(&point);
 }
 
 #[inline(never)]
@@ -330,8 +331,10 @@ pub fn full_viewingkey(key: &[u8; 32]) -> [u8; 96] {
     let mut nsk = [0u8; 32];
     sapling_derive_dummy_ask_and_nsk(key, &mut ask, &mut nsk);
 
-    let ak = sapling_ask_to_ak(&ask);
-    let nk = sapling_nsk_to_nk(&nsk);
+    let mut ak = [0u8; 32];
+    let mut nk = [0u8; 32];
+    sapling_ask_to_ak(&ask, &mut ak);
+    sapling_nsk_to_nk(&nsk, &mut nk);
 
     let ovk = outgoingviewingkey(key);
     let mut result = [0u8; 96];
@@ -534,8 +537,11 @@ pub fn derive_zip32_fvk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 9
         update_dk_zip32(&key, &mut divkey);
         update_exk_zip32(&key, &mut expkey);
     }
-    let ak = sapling_ask_to_ak(&ask.to_bytes());
-    let nk = sapling_nsk_to_nk(&nsk.to_bytes());
+    let mut ak = [0u8; 32];
+    let mut nk = [0u8; 32];
+    sapling_ask_to_ak(&ask.to_bytes(), &mut ak);
+    sapling_nsk_to_nk(&nsk.to_bytes(), &mut nk);
+
     let mut result = [0u8; 96];
     result[0..32].copy_from_slice(&ak);
     result[32..64].copy_from_slice(&nk);
@@ -690,7 +696,8 @@ pub fn get_dk(
 pub fn nsk_to_nk(nsk_ptr: *const [u8; 32], nk_ptr: *mut [u8; 32]) {
     let nsk = unsafe { &*nsk_ptr };
     let nk = unsafe { &mut *nk_ptr };
-    let tmp_nk = sapling_nsk_to_nk(&nsk);
+    let mut tmp_nk = [0u8; 32];
+    sapling_nsk_to_nk(&nsk, &mut tmp_nk);
     nk.copy_from_slice(&tmp_nk)
 }
 
@@ -1037,8 +1044,10 @@ mod tests {
 
         assert_eq!(ask, ask_test);
 
-        let nk: [u8; 32] = sapling_nsk_to_nk(&nsk);
-        let ak: [u8; 32] = sapling_ask_to_ak(&ask);
+        let mut ak = [0u8; 32];
+        let mut nk = [0u8; 32];
+        sapling_ask_to_ak(&ask, &mut ak);
+        sapling_nsk_to_nk(&nsk, &mut nk);
 
         assert_eq!(ak, ak_derived);
         assert_eq!(nk, nk_derived);
@@ -1150,8 +1159,10 @@ mod tests {
         let mut nsk = [0u8; 32];
         nsk.copy_from_slice(&keys[64..96]);
 
-        let nk: [u8; 32] = sapling_nsk_to_nk(&nsk);
-        let ak: [u8; 32] = sapling_ask_to_ak(&ask);
+        let mut ak = [0u8; 32];
+        let mut nk = [0u8; 32];
+        sapling_ask_to_ak(&ask, &mut ak);
+        sapling_nsk_to_nk(&nsk, &mut nk);
 
         let ivk = aknk_to_ivk(&ak, &nk);
 
@@ -1189,8 +1200,10 @@ mod tests {
         let mut nsk = [0u8; 32];
         nsk.copy_from_slice(&keys[64..96]);
 
-        let nk: [u8; 32] = sapling_nsk_to_nk(&nsk);
-        let ak: [u8; 32] = sapling_ask_to_ak(&ask);
+        let mut ak = [0u8; 32];
+        let mut nk = [0u8; 32];
+        sapling_ask_to_ak(&ask, &mut ak);
+        sapling_nsk_to_nk(&nsk, &mut nk);
 
         let ivk = aknk_to_ivk(&ak, &nk);
         let mut list = [0u8; 110];
@@ -1294,7 +1307,8 @@ mod tests {
                 0x0d, 0x0e, 0x88, 0x06
             ]
         );
-        let ak: [u8; 32] = sapling_ask_to_ak(&ask);
+        let mut ak = [0u8; 32];
+        sapling_ask_to_ak(&ask, &mut ak);
         assert_eq!(
             ak,
             [
@@ -1320,7 +1334,8 @@ mod tests {
             ]
         );
 
-        let nk: [u8; 32] = sapling_nsk_to_nk(&nsk);
+        let mut nk = [0u8; 32];
+        sapling_nsk_to_nk(&nsk, &mut nk);
         assert_eq!(
             nk,
             [

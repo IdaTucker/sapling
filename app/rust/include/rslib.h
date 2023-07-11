@@ -19,6 +19,10 @@ void rust_fr_add(uint8_t *a, uint8_t *b, uint8_t *out);
 
 void master_spending_key_zip32(uint8_t *seed, uint8_t *out_key);
 
+void sapling_nsk_to_nk(uint8_t *nsk, uint8_t* out_nk);
+
+void sapling_ask_to_ak(uint8_t *ask, uint8_t* out_ak);
+
 //ZIP32 functions
 void get_pkd(const uint8_t *seed_ptr, const uint32_t pos, const uint8_t *diversifier_ptr, uint8_t *pkd);
 

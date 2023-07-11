@@ -13,6 +13,8 @@ void sapling_derive_dummy_ask_and_nsk(const uint8_t *seed_ptr, uint8_t *ask_out,
 
 void rust_prf_expand(const uint8_t *seed_ptr, const uint8_t *t, uint8_t *expanded_out);
 
+void rust_from_bytes_wide(uint8_t *dest, uint8_t *src);
+
 //ZIP32 functions
 void get_pkd(const uint8_t *seed_ptr, const uint32_t pos, const uint8_t *diversifier_ptr, uint8_t *pkd);
 

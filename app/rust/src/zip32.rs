@@ -26,6 +26,16 @@ use crate::{bolos, c_check_app_canary, constants};
 
 
 #[no_mangle]
+pub extern "C" fn rust_from_bytes_wide(
+    dest: &mut [u8; 32],
+    src: &mut [u8; 64])
+{
+    let fr_dest = Fr::from_bytes_wide(src);
+    dest.copy_from_slice(&fr_dest.to_bytes());
+}
+
+
+#[no_mangle]
 pub extern "C" fn rust_prf_expand(
     sk: &[u8; 32],
     t: &[u8; 1],

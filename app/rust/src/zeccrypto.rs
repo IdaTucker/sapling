@@ -13,13 +13,15 @@ use crate::{bolos, pedersen::extended_to_bytes, zip32};
 
 #[inline(never)]
 pub fn rseed_generate_rcm(rseed: &[u8; 32]) -> Fr {
-    let bytes = zip32::prf_expand(rseed, &[0x04]);
+    let mut bytes = [0u8;64];
+    zip32::prf_expand(rseed, &[0x04], &mut bytes);
     jubjub::Fr::from_bytes_wide(&bytes)
 }
 
 #[inline(never)]
 pub fn rseed_generate_esk(rseed: &[u8; 32]) -> Fr {
-    let bytes = zip32::prf_expand(rseed, &[0x05]);
+    let mut bytes = [0u8;64];
+    zip32::prf_expand(rseed, &[0x05], &mut bytes);
     jubjub::Fr::from_bytes_wide(&bytes)
 }
 

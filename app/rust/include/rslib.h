@@ -8,6 +8,11 @@
 /****************************** others
  * ********************************************************************************/
 
+// functions for testing sapling
+void sapling_derive_dummy_ask_and_nsk(const uint8_t *seed_ptr, uint8_t *ask_out, uint8_t *nsk_out);
+
+void prf_expand(const uint8_t *seed_ptr, const uint8_t *t, uint8_t *expanded_out);
+
 //ZIP32 functions
 void get_pkd(const uint8_t *seed_ptr, const uint32_t pos, const uint8_t *diversifier_ptr, uint8_t *pkd);
 

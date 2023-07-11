@@ -25,23 +25,30 @@ use crate::pedersen::extended_to_bytes;
 use crate::{bolos, c_check_app_canary, constants};
 
 
-#[inline(always)]
-pub fn prf_expand(sk: &[u8], t: &[u8]) -> [u8; 64] {
-    bolos::blake2b_expand_seed(sk, t)
+#[no_mangle]
+pub extern "C" fn prf_expand(
+    sk: &[u8; 32],
+    t: &[u8; 1],
+    expanded_out: &mut [u8; 64])
+{
+    let expanded_seed = bolos::blake2b_expand_seed(sk, t);
+    expanded_out.copy_from_slice(&expanded_seed); // output is [u8;64]
 }
 
-#[inline(never)]
-pub fn sapling_derive_dummy_ask(sk_in: &[u8]) -> [u8; 32] {
-    let t = prf_expand(&sk_in, &[0x00]);
+#[no_mangle]
+pub extern "C" fn sapling_derive_dummy_ask_and_nsk(
+    sk_in: &[u8; 32],
+    ask_out: &mut [u8; 32],
+    nsk_out: &mut [u8; 32]) {
+    let mut t = [0u8;64];
+    prf_expand(&sk_in, &[0x00], &mut t);
     let ask = Fr::from_bytes_wide(&t);
-    ask.to_bytes()
-}
+    ask_out.copy_from_slice(&ask.to_bytes());
 
-#[inline(never)]
-pub fn sapling_derive_dummy_nsk(sk_in: &[u8]) -> [u8; 32] {
-    let t = prf_expand(&sk_in, &[0x01]);
+    let mut t = [0u8;64];
+    prf_expand(&sk_in, &[0x01], &mut t);
     let nsk = Fr::from_bytes_wide(&t);
-    nsk.to_bytes()
+    nsk_out.copy_from_slice(&nsk.to_bytes())
 }
 
 #[inline(never)]
@@ -278,25 +285,30 @@ pub fn master_spending_key_zip32(seed: &[u8; 32]) -> [u8; 64] {
 }
 
 #[inline(never)]
-pub fn diversifier_key_zip32(in_key: &[u8; 32]) -> [u8; 32] {
+pub fn diversifier_key_zip32(key: &[u8; 32]) -> [u8; 32] {
     let mut dk_m = [0u8; 32];
-    dk_m.copy_from_slice(&prf_expand(in_key, &[0x10])[..32]);
+    let mut expanded_seed = [0u8;64];
+    prf_expand(key, &[0x10], &mut expanded_seed);
+    dk_m.copy_from_slice(&expanded_seed[..32]);
     dk_m
 }
 
 #[inline(never)]
 pub fn outgoingviewingkey(key: &[u8; 32]) -> [u8; 32] {
     let mut ovk = [0u8; 32];
-    ovk.copy_from_slice(&prf_expand(key, &[0x02])[..32]);
+    let mut expanded_seed = [0u8;64];
+    prf_expand(key, &[0x12], &mut expanded_seed);
+    ovk.copy_from_slice(&expanded_seed[..32]);
     ovk
 }
 
 #[inline(never)]
 pub fn full_viewingkey(key: &[u8; 32]) -> [u8; 96] {
-    let ask = sapling_derive_dummy_ask(key);
-    let ak = sapling_ask_to_ak(&ask);
+    let mut ask = [0u8; 32];
+    let mut nsk = [0u8; 32];
+    sapling_derive_dummy_ask_and_nsk(key, &mut ask, &mut nsk);
 
-    let nsk = sapling_derive_dummy_nsk(key);
+    let ak = sapling_ask_to_ak(&ask);
     let nk = sapling_nsk_to_nk(&nsk);
 
     let ovk = outgoingviewingkey(key);
@@ -309,8 +321,10 @@ pub fn full_viewingkey(key: &[u8; 32]) -> [u8; 96] {
 
 #[inline(never)]
 pub fn expandedspendingkey_zip32(key: &[u8; 32]) -> [u8; 96] {
-    let ask = sapling_derive_dummy_ask(key);
-    let nsk = sapling_derive_dummy_nsk(key);
+    let mut ask = [0u8; 32];
+    let mut nsk = [0u8; 32];
+    sapling_derive_dummy_ask_and_nsk(key, &mut ask, &mut nsk);
+
     let ovk = outgoingviewingkey(key);
     let mut result = [0u8; 96];
     result[0..32].copy_from_slice(&ask);
@@ -328,8 +342,11 @@ pub fn update_dk_zip32(key: &[u8; 32], dk: &mut [u8; 32]) {
 
 #[inline(never)]
 pub fn update_exk_zip32(key: &[u8; 32], exk: &mut [u8; 96]) {
-    exk[0..32].copy_from_slice(&sapling_derive_dummy_ask(key));
-    exk[32..64].copy_from_slice(&sapling_derive_dummy_nsk(key));
+    let mut ask = [0u8; 32];
+    let mut nsk = [0u8; 32];
+    sapling_derive_dummy_ask_and_nsk(key, &mut ask, &mut nsk);
+    exk[0..32].copy_from_slice(&ask);
+    exk[32..64].copy_from_slice(&nsk);
     let mut ovkcopy = [0u8; 32];
     ovkcopy.copy_from_slice(&exk[64..96]);
     exk[64..96].copy_from_slice(&bolos::blake2b_expand_vec_two(key, &[0x15], &ovkcopy)[..32]);
@@ -344,9 +361,13 @@ pub fn derive_zip32_master(seed: &[u8; 32]) -> [u8; 96] {
     key.copy_from_slice(&tmp[..32]);
     chain.copy_from_slice(&tmp[32..]);
 
-    let ask = Fr::from_bytes_wide(&prf_expand(&key, &[0x00]));
+    let mut expanded_seed = [0u8;64];
+    prf_expand(&key, &[0x00], &mut expanded_seed);
+    let ask = Fr::from_bytes_wide(&expanded_seed);
 
-    let nsk = Fr::from_bytes_wide(&prf_expand(&key, &[0x01]));
+    expanded_seed = [0u8;64];
+    prf_expand(&key, &[0x01], &mut expanded_seed);
+    let nsk = Fr::from_bytes_wide(&expanded_seed);
 
     let divkey = diversifier_key_zip32(&key); //32
     let mut result = [0u8; 96];
@@ -372,9 +393,13 @@ pub fn derive_zip32_ovk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 3
     key.copy_from_slice(&tmp[..32]);
     chain.copy_from_slice(&tmp[32..]);
 
-    let mut ask = Fr::from_bytes_wide(&prf_expand(&key, &[0x00]));
+    let mut expanded_seed = [0u8;64];
+    prf_expand(&key, &[0x00], &mut expanded_seed);
+    let mut ask = Fr::from_bytes_wide(&expanded_seed);
 
-    let mut nsk = Fr::from_bytes_wide(&prf_expand(&key, &[0x01]));
+    expanded_seed = [0u8;64];
+    prf_expand(&key, &[0x01], &mut expanded_seed);
+    let mut nsk = Fr::from_bytes_wide(&expanded_seed);
 
     let mut expkey: [u8; 96];
     expkey = expandedspendingkey_zip32(&key); //96
@@ -404,8 +429,13 @@ pub fn derive_zip32_ovk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 3
         key.copy_from_slice(&tmp[..32]);
         chain.copy_from_slice(&tmp[32..]);
 
-        let ask_cur = Fr::from_bytes_wide(&prf_expand(&key, &[0x13]));
-        let nsk_cur = Fr::from_bytes_wide(&prf_expand(&key, &[0x14]));
+        let mut expanded_seed = [0u8;64];
+        prf_expand(&key, &[0x13], &mut expanded_seed);
+        let ask_cur = Fr::from_bytes_wide(&expanded_seed);
+
+        expanded_seed = [0u8;64];
+        prf_expand(&key, &[0x14], &mut expanded_seed);
+        let nsk_cur = Fr::from_bytes_wide(&expanded_seed);
 
         ask += ask_cur;
         nsk += nsk_cur;
@@ -430,9 +460,13 @@ pub fn derive_zip32_fvk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 9
     key.copy_from_slice(&tmp[..32]);
     chain.copy_from_slice(&tmp[32..]);
 
-    let mut ask = Fr::from_bytes_wide(&prf_expand(&key, &[0x00]));
+    let mut expanded_seed = [0u8;64];
+    prf_expand(&key, &[0x00], &mut expanded_seed);
+    let mut ask = Fr::from_bytes_wide(&expanded_seed);
 
-    let mut nsk = Fr::from_bytes_wide(&prf_expand(&key, &[0x01]));
+    expanded_seed = [0u8;64];
+    prf_expand(&key, &[0x01], &mut expanded_seed);
+    let mut nsk = Fr::from_bytes_wide(&expanded_seed);
 
     let mut expkey: [u8; 96];
     expkey = expandedspendingkey_zip32(&key); //96
@@ -462,8 +496,13 @@ pub fn derive_zip32_fvk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 9
         key.copy_from_slice(&tmp[..32]);
         chain.copy_from_slice(&tmp[32..]);
 
-        let ask_cur = Fr::from_bytes_wide(&prf_expand(&key, &[0x13]));
-        let nsk_cur = Fr::from_bytes_wide(&prf_expand(&key, &[0x14]));
+        let mut expanded_seed = [0u8;64];
+        prf_expand(&key, &[0x13], &mut expanded_seed);
+        let ask_cur = Fr::from_bytes_wide(&expanded_seed);
+
+        expanded_seed = [0u8;64];
+        prf_expand(&key, &[0x14], &mut expanded_seed);
+        let nsk_cur = Fr::from_bytes_wide(&expanded_seed);
 
         ask += ask_cur;
         nsk += nsk_cur;
@@ -489,7 +528,10 @@ pub fn master_nsk_from_seed(seed: &[u8; 32]) -> [u8; 32] {
 
     key.copy_from_slice(&tmp[..32]);
 
-    let nsk = Fr::from_bytes_wide(&prf_expand(&key, &[0x01]));
+    let mut expanded_seed = [0u8;64];
+    prf_expand(&key, &[0x01], &mut expanded_seed);
+    let nsk = Fr::from_bytes_wide(&expanded_seed);
+
     let mut result = [0u8; 32];
     result.copy_from_slice(&nsk.to_bytes());
     result
@@ -502,9 +544,13 @@ pub fn derive_zip32_child_fromseedandpath(seed: &[u8; 32], path: &[u32], child_c
     // master secret key sk = tmp[..32]
     // chain = tmp[32..]
 
-    let mut ask = Fr::from_bytes_wide(&prf_expand(tmp[..32].try_into().unwrap(), &[0x00]));
+    let mut expanded_seed = [0u8;64];
+    prf_expand(tmp[..32].try_into().unwrap(), &[0x00], &mut expanded_seed);
+    let mut ask = Fr::from_bytes_wide(&expanded_seed);
 
-    let mut nsk = Fr::from_bytes_wide(&prf_expand(tmp[..32].try_into().unwrap(), &[0x01]));
+    expanded_seed = [0u8;64];
+    prf_expand(tmp[..32].try_into().unwrap(), &[0x01], &mut expanded_seed);
+    let mut nsk = Fr::from_bytes_wide(&expanded_seed);
 
     let mut expkey: [u8; 96];
     expkey = expandedspendingkey_zip32(&tmp[..32].try_into().unwrap()); //96
@@ -531,8 +577,15 @@ pub fn derive_zip32_child_fromseedandpath(seed: &[u8; 32], path: &[u32], child_c
             tmp = bolos::blake2b_expand_vec_four(&tmp[32..], &[0x12], &fvk, &divkey, &le_i);
         }
 
-        let ask_cur = Fr::from_bytes_wide(&prf_expand(&tmp[..32], &[0x13]));
-        let nsk_cur = Fr::from_bytes_wide(&prf_expand(&tmp[..32], &[0x14]));
+        let mut key = [0u8;32];
+        key.copy_from_slice(&tmp[..32]);
+        let mut expanded_seed = [0u8;64];
+        prf_expand(&key, &[0x13], &mut expanded_seed);
+        let ask_cur = Fr::from_bytes_wide(&expanded_seed);
+
+        expanded_seed = [0u8;64];
+        prf_expand(&key, &[0x14], &mut expanded_seed);
+        let nsk_cur = Fr::from_bytes_wide(&expanded_seed);
 
         ask += ask_cur;
         nsk += nsk_cur;
@@ -1205,7 +1258,9 @@ mod tests {
     #[test]
     fn test_ak() {
         let seed = [0u8; 32];
-        let ask: [u8; 32] = sapling_derive_dummy_ask(&seed);
+        let mut ask = [0u8; 32];
+        let mut nsk = [0u8; 32];
+        sapling_derive_dummy_ask_and_nsk(&seed, &mut ask, &mut nsk);
         assert_eq!(
             ask,
             [
@@ -1228,8 +1283,9 @@ mod tests {
     #[test]
     fn test_nk() {
         let seed = [0u8; 32];
-
-        let nsk: [u8; 32] = sapling_derive_dummy_nsk(&seed);
+        let mut ask = [0u8; 32];
+        let mut nsk = [0u8; 32];
+        sapling_derive_dummy_ask_and_nsk(&seed, &mut ask, &mut nsk);
         assert_eq!(
             nsk,
             [

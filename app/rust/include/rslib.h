@@ -15,6 +15,10 @@ void rust_prf_expand(const uint8_t *seed_ptr, const uint8_t *t, uint8_t *expande
 
 void rust_from_bytes_wide(uint8_t *dest, uint8_t *src);
 
+void rust_fr_add(uint8_t *a, uint8_t *b, uint8_t *out);
+
+void master_spending_key_zip32(uint8_t *seed, uint8_t *out_key);
+
 //ZIP32 functions
 void get_pkd(const uint8_t *seed_ptr, const uint32_t pos, const uint8_t *diversifier_ptr, uint8_t *pkd);
 

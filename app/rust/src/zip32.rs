@@ -24,6 +24,17 @@ use crate::constants::{AK_NK, AK_NSK, ASK_NSK,
 use crate::pedersen::extended_to_bytes;
 use crate::{bolos, c_check_app_canary, constants};
 
+#[no_mangle]
+pub extern "C" fn rust_fr_add(
+    a: &[u8; 32],
+    b: &[u8; 32],
+    out: &mut [u8;32])
+{
+    let fr_a = Fr::from_bytes(a).unwrap();
+    let fr_b = Fr::from_bytes(b).unwrap();
+    let fr_sum = fr_a.add(&fr_b);
+    out.copy_from_slice(&fr_sum.to_bytes());
+}
 
 #[no_mangle]
 pub extern "C" fn rust_from_bytes_wide(
@@ -288,10 +299,11 @@ pub fn default_pkd(ivk: &[u8; 32], d: &[u8; 11]) -> [u8; 32] {
     tmp
 }
 
-#[inline(never)]
-pub fn master_spending_key_zip32(seed: &[u8; 32]) -> [u8; 64] {
+#[no_mangle]
+pub extern "C" fn master_spending_key_zip32(seed: &[u8; 32], out_key: &mut [u8;64]){
     pub const ZIP32_SAPLING_MASTER_PERSONALIZATION: &[u8; 16] = b"MASP_IP32Sapling";
-    bolos::blake2b64_with_personalization(ZIP32_SAPLING_MASTER_PERSONALIZATION, seed)
+    let key = bolos::blake2b64_with_personalization(ZIP32_SAPLING_MASTER_PERSONALIZATION, seed);
+    out_key.copy_from_slice(&key);
 }
 
 #[inline(never)]
@@ -364,7 +376,8 @@ pub fn update_exk_zip32(key: &[u8; 32], exk: &mut [u8; 96]) {
 
 #[inline(never)]
 pub fn derive_zip32_master(seed: &[u8; 32]) -> [u8; 96] {
-    let tmp = master_spending_key_zip32(seed); //64
+    let mut tmp = [0u8;64];
+    master_spending_key_zip32(seed, &mut tmp); //64
     let mut key = [0u8; 32]; //32
     let mut chain = [0u8; 32]; //32
 
@@ -395,8 +408,8 @@ ChildIndex::Hardened(pos)
 #[inline(never)]
 pub fn derive_zip32_ovk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 32] {
     //ASSERT: len(path) == len(harden)
-
-    let mut tmp = master_spending_key_zip32(seed); //64
+    let mut tmp = [0u8;64];
+    master_spending_key_zip32(seed, &mut tmp);  //64
     let mut key = [0u8; 32]; //32
     let mut chain = [0u8; 32]; //32
 
@@ -462,8 +475,8 @@ pub fn derive_zip32_ovk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 3
 #[inline(never)]
 pub fn derive_zip32_fvk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 96] {
     //ASSERT: len(path) == len(harden)
-
-    let mut tmp = master_spending_key_zip32(seed); //64
+    let mut tmp = [0u8;64];
+    master_spending_key_zip32(seed, &mut tmp);  //64
     let mut key = [0u8; 32]; //32
     let mut chain = [0u8; 32]; //32
 
@@ -533,7 +546,8 @@ pub fn derive_zip32_fvk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 9
 #[inline(never)]
 pub fn master_nsk_from_seed(seed: &[u8; 32]) -> [u8; 32] {
 
-    let tmp = master_spending_key_zip32(seed); //64
+    let mut tmp = [0u8;64];
+    master_spending_key_zip32(seed, &mut tmp); //64
     let mut key = [0u8; 32]; //32
 
     key.copy_from_slice(&tmp[..32]);
@@ -549,7 +563,8 @@ pub fn master_nsk_from_seed(seed: &[u8; 32]) -> [u8; 32] {
 
 #[inline(never)]
 pub fn derive_zip32_child_fromseedandpath(seed: &[u8; 32], path: &[u32], child_components: u8) -> [u8; 96] {
-    let mut tmp = master_spending_key_zip32(seed); //64
+    let mut tmp = [0u8;64];
+    master_spending_key_zip32(seed, &mut tmp);  //64
 
     // master secret key sk = tmp[..32]
     // chain = tmp[32..]

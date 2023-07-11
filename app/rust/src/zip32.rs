@@ -26,7 +26,7 @@ use crate::{bolos, c_check_app_canary, constants};
 
 
 #[no_mangle]
-pub extern "C" fn prf_expand(
+pub extern "C" fn rust_prf_expand(
     sk: &[u8; 32],
     t: &[u8; 1],
     expanded_out: &mut [u8; 64])
@@ -41,12 +41,12 @@ pub extern "C" fn sapling_derive_dummy_ask_and_nsk(
     ask_out: &mut [u8; 32],
     nsk_out: &mut [u8; 32]) {
     let mut t = [0u8;64];
-    prf_expand(&sk_in, &[0x00], &mut t);
+    rust_prf_expand(&sk_in, &[0x00], &mut t);
     let ask = Fr::from_bytes_wide(&t);
     ask_out.copy_from_slice(&ask.to_bytes());
 
     let mut t = [0u8;64];
-    prf_expand(&sk_in, &[0x01], &mut t);
+    rust_prf_expand(&sk_in, &[0x01], &mut t);
     let nsk = Fr::from_bytes_wide(&t);
     nsk_out.copy_from_slice(&nsk.to_bytes())
 }
@@ -288,7 +288,7 @@ pub fn master_spending_key_zip32(seed: &[u8; 32]) -> [u8; 64] {
 pub fn diversifier_key_zip32(key: &[u8; 32]) -> [u8; 32] {
     let mut dk_m = [0u8; 32];
     let mut expanded_seed = [0u8;64];
-    prf_expand(key, &[0x10], &mut expanded_seed);
+    rust_prf_expand(key, &[0x10], &mut expanded_seed);
     dk_m.copy_from_slice(&expanded_seed[..32]);
     dk_m
 }
@@ -297,7 +297,7 @@ pub fn diversifier_key_zip32(key: &[u8; 32]) -> [u8; 32] {
 pub fn outgoingviewingkey(key: &[u8; 32]) -> [u8; 32] {
     let mut ovk = [0u8; 32];
     let mut expanded_seed = [0u8;64];
-    prf_expand(key, &[0x12], &mut expanded_seed);
+    rust_prf_expand(key, &[0x12], &mut expanded_seed);
     ovk.copy_from_slice(&expanded_seed[..32]);
     ovk
 }
@@ -362,11 +362,11 @@ pub fn derive_zip32_master(seed: &[u8; 32]) -> [u8; 96] {
     chain.copy_from_slice(&tmp[32..]);
 
     let mut expanded_seed = [0u8;64];
-    prf_expand(&key, &[0x00], &mut expanded_seed);
+    rust_prf_expand(&key, &[0x00], &mut expanded_seed);
     let ask = Fr::from_bytes_wide(&expanded_seed);
 
     expanded_seed = [0u8;64];
-    prf_expand(&key, &[0x01], &mut expanded_seed);
+    rust_prf_expand(&key, &[0x01], &mut expanded_seed);
     let nsk = Fr::from_bytes_wide(&expanded_seed);
 
     let divkey = diversifier_key_zip32(&key); //32
@@ -394,11 +394,11 @@ pub fn derive_zip32_ovk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 3
     chain.copy_from_slice(&tmp[32..]);
 
     let mut expanded_seed = [0u8;64];
-    prf_expand(&key, &[0x00], &mut expanded_seed);
+    rust_prf_expand(&key, &[0x00], &mut expanded_seed);
     let mut ask = Fr::from_bytes_wide(&expanded_seed);
 
     expanded_seed = [0u8;64];
-    prf_expand(&key, &[0x01], &mut expanded_seed);
+    rust_prf_expand(&key, &[0x01], &mut expanded_seed);
     let mut nsk = Fr::from_bytes_wide(&expanded_seed);
 
     let mut expkey: [u8; 96];
@@ -430,11 +430,11 @@ pub fn derive_zip32_ovk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 3
         chain.copy_from_slice(&tmp[32..]);
 
         let mut expanded_seed = [0u8;64];
-        prf_expand(&key, &[0x13], &mut expanded_seed);
+        rust_prf_expand(&key, &[0x13], &mut expanded_seed);
         let ask_cur = Fr::from_bytes_wide(&expanded_seed);
 
         expanded_seed = [0u8;64];
-        prf_expand(&key, &[0x14], &mut expanded_seed);
+        rust_prf_expand(&key, &[0x14], &mut expanded_seed);
         let nsk_cur = Fr::from_bytes_wide(&expanded_seed);
 
         ask += ask_cur;
@@ -461,11 +461,11 @@ pub fn derive_zip32_fvk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 9
     chain.copy_from_slice(&tmp[32..]);
 
     let mut expanded_seed = [0u8;64];
-    prf_expand(&key, &[0x00], &mut expanded_seed);
+    rust_prf_expand(&key, &[0x00], &mut expanded_seed);
     let mut ask = Fr::from_bytes_wide(&expanded_seed);
 
     expanded_seed = [0u8;64];
-    prf_expand(&key, &[0x01], &mut expanded_seed);
+    rust_prf_expand(&key, &[0x01], &mut expanded_seed);
     let mut nsk = Fr::from_bytes_wide(&expanded_seed);
 
     let mut expkey: [u8; 96];
@@ -497,11 +497,11 @@ pub fn derive_zip32_fvk_fromseedandpath(seed: &[u8; 32], path: &[u32]) -> [u8; 9
         chain.copy_from_slice(&tmp[32..]);
 
         let mut expanded_seed = [0u8;64];
-        prf_expand(&key, &[0x13], &mut expanded_seed);
+        rust_prf_expand(&key, &[0x13], &mut expanded_seed);
         let ask_cur = Fr::from_bytes_wide(&expanded_seed);
 
         expanded_seed = [0u8;64];
-        prf_expand(&key, &[0x14], &mut expanded_seed);
+        rust_prf_expand(&key, &[0x14], &mut expanded_seed);
         let nsk_cur = Fr::from_bytes_wide(&expanded_seed);
 
         ask += ask_cur;
@@ -529,7 +529,7 @@ pub fn master_nsk_from_seed(seed: &[u8; 32]) -> [u8; 32] {
     key.copy_from_slice(&tmp[..32]);
 
     let mut expanded_seed = [0u8;64];
-    prf_expand(&key, &[0x01], &mut expanded_seed);
+    rust_prf_expand(&key, &[0x01], &mut expanded_seed);
     let nsk = Fr::from_bytes_wide(&expanded_seed);
 
     let mut result = [0u8; 32];
@@ -545,11 +545,11 @@ pub fn derive_zip32_child_fromseedandpath(seed: &[u8; 32], path: &[u32], child_c
     // chain = tmp[32..]
 
     let mut expanded_seed = [0u8;64];
-    prf_expand(tmp[..32].try_into().unwrap(), &[0x00], &mut expanded_seed);
+    rust_prf_expand(tmp[..32].try_into().unwrap(), &[0x00], &mut expanded_seed);
     let mut ask = Fr::from_bytes_wide(&expanded_seed);
 
     expanded_seed = [0u8;64];
-    prf_expand(tmp[..32].try_into().unwrap(), &[0x01], &mut expanded_seed);
+    rust_prf_expand(tmp[..32].try_into().unwrap(), &[0x01], &mut expanded_seed);
     let mut nsk = Fr::from_bytes_wide(&expanded_seed);
 
     let mut expkey: [u8; 96];
@@ -580,11 +580,11 @@ pub fn derive_zip32_child_fromseedandpath(seed: &[u8; 32], path: &[u32], child_c
         let mut key = [0u8;32];
         key.copy_from_slice(&tmp[..32]);
         let mut expanded_seed = [0u8;64];
-        prf_expand(&key, &[0x13], &mut expanded_seed);
+        rust_prf_expand(&key, &[0x13], &mut expanded_seed);
         let ask_cur = Fr::from_bytes_wide(&expanded_seed);
 
         expanded_seed = [0u8;64];
-        prf_expand(&key, &[0x14], &mut expanded_seed);
+        rust_prf_expand(&key, &[0x14], &mut expanded_seed);
         let nsk_cur = Fr::from_bytes_wide(&expanded_seed);
 
         ask += ask_cur;

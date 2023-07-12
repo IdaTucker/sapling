@@ -54,7 +54,7 @@ void get_diversifier_list(const uint8_t *sk_ptr, uint8_t *diversifier_list);
 
 void get_diversifier_fromlist(const uint8_t *diversifier_list, uint8_t *diversifier);
 
-bool is_valid_diversifier(const uint8_t *diversifier);
+uint8_t is_valid_diversifier(const uint8_t *diversifier);
 
 void get_diversifier_list_withstartindex(const uint8_t *seed_ptr, const uint32_t pos, const uint8_t *startindex, uint8_t *diversifier_list);
 

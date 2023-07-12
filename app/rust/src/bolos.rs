@@ -206,6 +206,56 @@ pub fn blake2b_expand_vec_two(sk: &[u8], a: &[u8], b: &[u8]) -> [u8; 64] {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn rust_blake2b_expand_vec_three(
+    in_a_ptr: *const u8,
+    in_a_len: usize,
+    in_b_ptr: *const u8,
+    in_b_len: usize,
+    in_c_ptr: *const u8,
+    in_c_len: usize,
+    in_d_ptr: *const u8,
+    in_d_len: usize,
+    out_hash_ptr: *mut u8,
+    out_hash_len: usize,
+) {
+
+    // Convert the input pointers and lengths into slices
+    let in_a = slice::from_raw_parts(in_a_ptr, in_a_len);
+    let in_b = slice::from_raw_parts(in_b_ptr, in_b_len);
+    let in_c = slice::from_raw_parts(in_c_ptr, in_c_len);
+    let in_d = slice::from_raw_parts(in_d_ptr, in_d_len);
+
+    // Call the original function
+    let hash = blake2b_expand_vec_three(in_a, in_b, in_c, in_d);
+
+    // Copy the result back to the C memory location
+    let out_hash = slice::from_raw_parts_mut(out_hash_ptr, out_hash_len);
+    out_hash.copy_from_slice(&hash);
+}
+
+
+pub fn blake2b_expand_vec_three(
+    in_a: &[u8],
+    in_b: &[u8],
+    in_c: &[u8],
+    in_d: &[u8],
+) -> [u8; 64] {
+    pub const PRF_EXPAND_PERSONALIZATION: &[u8; 16] = b"MASP__ExpandSeed";
+    let mut blake2b_state = Blake2bParams::new()
+        .hash_length(64)
+        .personal(PRF_EXPAND_PERSONALIZATION)
+        .to_state();
+    blake2b_state.update(in_a);
+    blake2b_state.update(in_b);
+    blake2b_state.update(in_c);
+    blake2b_state.update(in_d);
+    let mut hash = [0u8; 64];
+    hash.copy_from_slice(&blake2b_state.finalize().as_bytes());
+    hash
+}
+
+
+#[no_mangle]
 pub unsafe extern "C" fn rust_blake2b_expand_vec_four(
     in_a_ptr: *const u8,
     in_a_len: usize,

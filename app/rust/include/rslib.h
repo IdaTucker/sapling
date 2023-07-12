@@ -23,6 +23,21 @@ void sapling_nsk_to_nk(uint8_t *nsk, uint8_t* out_nk);
 
 void sapling_ask_to_ak(uint8_t *ask, uint8_t* out_ak);
 
+void rust_blake2b_expand_vec_four(
+    const uint8_t* in_a_ptr, size_t in_a_len,
+    const uint8_t* in_b_ptr, size_t in_b_len,
+    const uint8_t* in_c_ptr, size_t in_c_len,
+    const uint8_t* in_d_ptr, size_t in_d_len,
+    const uint8_t* in_e_ptr, size_t in_e_len,
+    uint8_t* out_hash_ptr, size_t out_hash_len);
+
+void rust_blake2b_expand_vec_two(
+        const uint8_t* in_sk_ptr, size_t in_sk_len,
+        const uint8_t* in_b_ptr, size_t in_b_len,
+        const uint8_t* in_c_ptr, size_t in_c_len,
+        uint8_t* out_hash_ptr, size_t out_hash_len);
+
+
 //ZIP32 functions
 void get_pkd(const uint8_t *seed_ptr, const uint32_t pos, const uint8_t *diversifier_ptr, uint8_t *pkd);
 

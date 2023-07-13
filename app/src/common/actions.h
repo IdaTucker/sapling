@@ -39,7 +39,6 @@ extern address_state_t action_addrResponse;
 extern key_state_t key_state;
 
 __Z_INLINE void app_reject() {
-    transaction_reset();
     MEMZERO(G_io_apdu_buffer, IO_APDU_BUFFER_SIZE);
     view_tx_state();
     set_code(G_io_apdu_buffer, 0, APDU_CODE_COMMAND_NOT_ALLOWED);

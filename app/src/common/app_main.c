@@ -173,7 +173,6 @@ void app_init() {
     BLE_power(1, "Nano X");
 #endif // HAVE_BLE
 
-    transaction_reset();
 }
 
 #pragma clang diagnostic push

@@ -23,7 +23,6 @@ extern "C" {
 #include "parser_common.h"
 #include "parser_txdef.h"
 #include "hexutils.h"
-#include "crypto.h"
 
 #define NUM_ITEMS_TIN       2       //address, value
 #define NUM_ITEMS_TOUT      2       //address, value

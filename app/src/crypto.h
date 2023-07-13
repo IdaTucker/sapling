@@ -27,19 +27,9 @@ extern "C" {
 #include "zxerror.h"
 
 
-extern uint32_t hdPath[HDPATH_LEN_DEFAULT];
-
 extern address_kind_e addressKind;
 
-zxerr_t crypto_fillSaplingSeed(uint8_t *sk);
 
-zxerr_t crypto_extractPublicKey(const uint32_t path[HDPATH_LEN_DEFAULT], uint8_t *pubKey, uint16_t pubKeyLen);
-
-zxerr_t crypto_fillAddress_secp256k1(uint8_t *buffer, uint16_t bufferLen, uint16_t *replyLen);
-
-zxerr_t crypto_fillAddress_sapling(uint8_t *buffer, uint16_t bufferLen, uint32_t p, uint16_t *replyLen);
-zxerr_t crypto_fillAddress_with_diversifier_sapling(uint8_t *buffer, uint16_t bufferLen, uint32_t p, uint8_t *div,
-                                                    uint16_t *replyLen);
 zxerr_t crypto_diversifier_with_startindex(uint8_t *buffer, uint32_t p, const uint8_t *startindex,
                                            uint16_t *replylen);
 

@@ -16,7 +16,6 @@
 #pragma once
 
 #include <stdint.h>
-#include "crypto.h"
 #include "tx.h"
 #include "apdu_codes.h"
 #include "zcash_apdu_errors.h"

@@ -18,7 +18,6 @@
 #include "parser_impl.h"
 #include "parser_txdef.h"
 #include "coin.h"
-#include "crypto.h"
 #include "zxformat.h"
 
 parser_error_t parser_init_context(parser_context_t *ctx, const uint8_t *buffer, uint16_t bufferSize) {

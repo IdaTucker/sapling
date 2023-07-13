@@ -20,57 +20,5 @@
 #include "zxmacros.h"
 #include "zxformat.h"
 #include "app_mode.h"
-#include "crypto.h"
 #include "actions.h"
 
-zxerr_t addr_getNumItems(uint8_t *num_items) {
-    *num_items = 1;
-    if (app_mode_expert()) {
-        *num_items = 2;
-    }
-    return zxerr_ok;
-}
-
-zxerr_t addr_getItem(int8_t displayIdx,
-                     char *outKey, uint16_t outKeyLen,
-                     char *outVal, uint16_t outValLen,
-                     uint8_t pageIdx, uint8_t *pageCount) {
-    switch (displayIdx) {
-        case 0:
-            switch (action_addrResponse.kind) {
-                case addr_secp256k1:
-                    snprintf(outKey, outKeyLen, "Unshielded");
-                    pageString(outVal, outValLen, (char *) (G_io_apdu_buffer + VIEW_ADDRESS_OFFSET_SECP256K1), pageIdx,
-                               pageCount);
-                    return zxerr_ok;
-
-                case addr_sapling:
-                    snprintf(outKey, outKeyLen, "Shielded");
-                    pageString(outVal, outValLen, (char *) (G_io_apdu_buffer + VIEW_ADDRESS_OFFSET_SAPLING), pageIdx,
-                               pageCount);
-                    return zxerr_ok;
-
-                case addr_sapling_div:
-                    snprintf(outKey, outKeyLen, "Shielded with div");
-                    pageString(outVal, outValLen, (char *) (G_io_apdu_buffer + VIEW_ADDRESS_OFFSET_SAPLING), pageIdx,
-                               pageCount);
-                    return zxerr_ok;
-
-                default:
-                    return zxerr_no_data;
-            }
-        case 1: {
-            if (!app_mode_expert()) {
-                return zxerr_no_data;
-            }
-
-            snprintf(outKey, outKeyLen, "Your Path");
-            char buffer[300];
-            bip32_to_str(buffer, sizeof(buffer), hdPath, HDPATH_LEN_DEFAULT);
-            pageString(outVal, outValLen, buffer, pageIdx, pageCount);
-            return zxerr_ok;
-        }
-        default:
-            return zxerr_no_data;
-    }
-}

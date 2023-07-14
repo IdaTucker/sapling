@@ -15,7 +15,6 @@
 ********************************************************************************/
 
 #include "index_sapling.h"
-#include "nvdata.h"
 
 
 uint16_t length_spend_old_data() {

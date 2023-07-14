@@ -19,7 +19,6 @@
 #include <zxformat.h>
 #include "os.h"
 #include "cx.h"
-#include "nvdata.h"
 #include "sighash.h"
 #include "index_sapling.h"
 #include "txid.h"
@@ -55,63 +54,17 @@ void shielded_spend_hash(const uint8_t *input, uint16_t inputlen, uint8_t *outpu
 }
 
 static void signature_hash_v4(const uint8_t *input, uint16_t inputlen, uint8_t *output) {
-
 }
 
 static void signature_hash_v5(const uint8_t *input, uint8_t *start_signdata, uint8_t index, signable_input type, uint8_t *output) {
-    cx_blake2b_t ctx;
-
-    uint8_t personalization[16] = {0};
-    MEMCPY(personalization, "MASP_TxHash_", 12);
-    MEMCPY(personalization + 12, CONSENSUS_BRANCH_ID_ORCHARD, 4);
-    cx_blake2b_init2(&ctx, 256, NULL, 0, (uint8_t *) personalization, 16);
-
-    uint8_t header_digest[32] = {0};
-    uint8_t transparent_digest[32] = {0};
-    uint8_t sapling_digest[32] = {0};
-    uint8_t orchard_digest[32] = {0};
-
-    hash_header_txid_data(start_signdata, header_digest);
-    transparent_sig_digest(input, start_signdata, index, type, transparent_digest);
-    hash_sapling_txid_data(start_signdata, sapling_digest);
-    hash_empty_orchard_txid_data(orchard_digest);
-
-    cx_hash(&ctx.header, 0, header_digest, HASH_SIZE, NULL, 0);
-    cx_hash(&ctx.header, 0, transparent_digest, HASH_SIZE, NULL, 0);
-    cx_hash(&ctx.header, 0, sapling_digest, HASH_SIZE, NULL, 0);
-    cx_hash(&ctx.header, CX_LAST, orchard_digest, HASH_SIZE, output, HASH_SIZE);
 }
 
 void signature_hash(const uint8_t *txdata, uint8_t *start_signdata, uint16_t inputlen, const uint8_t tx_version, uint8_t *output){
-    if (tx_version == TX_VERSION_SAPLING) {
-        signature_hash_v4(start_signdata, inputlen, output);
-    }
-    else if (tx_version == TX_VERSION_NU5)
-    {
-        signature_hash_v5(txdata, start_signdata, 0, shielded, output);
-    }
 }
 
 static void signature_script_hash_v4(const uint8_t *input, uint16_t inputlen, uint8_t *script, uint16_t scriptlen, uint8_t *output) {
-    cx_blake2b_t ctx;
-
-	uint8_t personalization[16] = {0};
-    MEMCPY(personalization, "MASP_SigHash", 12);
-    MEMCPY(personalization + 12, CONSENSUS_BRANCH_ID_ORCHARD, 4);
-
-    cx_blake2b_init2(&ctx, 256, NULL, 0, (uint8_t *) personalization, 16);
-    cx_hash(&ctx.header, 0, input, inputlen, NULL, 0);
-
-    cx_hash(&ctx.header, CX_LAST, script, scriptlen, output, HASH_SIZE);
 }
 
 void signature_script_hash(const uint8_t *input, uint8_t *start_signdata, uint16_t inputlen, uint8_t *script, uint16_t scriptlen, uint8_t index, const uint8_t tx_version, uint8_t *output) {
-    if (tx_version==TX_VERSION_SAPLING) {
-        signature_script_hash_v4(start_signdata, inputlen, script, scriptlen, output);
-    }
-    else if (tx_version == TX_VERSION_NU5)
-    {
-        signature_hash_v5(input, start_signdata, index, transparent, output);
-    }
 }
 

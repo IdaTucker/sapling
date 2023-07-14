@@ -22,7 +22,6 @@
 #include <os_io_seproxyhal.h>
 #include "coin.h"
 #include "app_main.h"
-#include "nvdata.h"
 #include "parser.h"
 
 typedef struct {

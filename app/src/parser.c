@@ -25,7 +25,6 @@
 #include "coin.h"
 #include "parser_txdef.h"
 #include "rslib.h"
-#include "nvdata.h"
 #include "bech32.h"
 #include "base58.h"
 #include "view.h"
@@ -33,136 +32,16 @@
 
 #define DEFAULT_MEMOTYPE        0xf6
 
-typedef enum {
-    type_tin = 0,
-    type_tout = 1,
-    type_sspend = 2,
-    type_sout = 3,
-    type_txfee = 4,
-} sapling_parser_type_e;
-
-typedef struct {
-    sapling_parser_type_e type;
-    uint8_t index;
-} parser_sapling_t;
-
-parser_error_t parser_sapling_path_with_div(const uint8_t *data, size_t dataLen, parser_addr_div_t *prs) {
-    if (dataLen < 15) {
-        return parser_context_unexpected_size;
-    }
-    parser_context_t pars_ctx;
-    parser_error_t pars_err;
-    pars_ctx.offset = 0;
-    pars_ctx.buffer = data;
-    pars_ctx.bufferLen = 4;
-    uint32_t p = 0;
-    pars_err = _readUInt32(&pars_ctx, &p);
-    if (pars_err != parser_ok) {
-        return pars_err;
-    }
-    prs->path = p | 0x80000000;
-    memcpy(prs->div, data + 4, 11);
-    return parser_ok;
-}
-
-parser_error_t parser_sapling_path(const uint8_t *data, size_t dataLen, uint32_t *p) {
-    if (dataLen < 4) {
-        return parser_context_unexpected_size;
-    }
-    parser_context_t pars_ctx;
-    parser_error_t pars_err;
-    pars_ctx.offset = 0;
-    pars_ctx.buffer = data;
-    pars_ctx.bufferLen = 4;
-    pars_err = _readUInt32(&pars_ctx, p);
-    if (pars_err != parser_ok) {
-        return pars_err;
-    }
-    *p |= 0x80000000;
-    return parser_ok;
-}
 
 void view_tx_state() {
     return;
 }
 
 parser_error_t parser_parse(parser_context_t *ctx, const uint8_t *data, size_t dataLen) {
-    CHECK_PARSER_ERR(parser_init(ctx, data, dataLen))
-
-
-
     return parser_ok;
 }
 
 parser_error_t parser_validate() {
-    // Iterate through all items to check that all can be shown and are valid
-    uint8_t numItems = 0;
-    CHECK_PARSER_ERR(parser_getNumItems(&numItems))
-
-    char tmpKey[30];
-    char tmpVal[30];
-
-    for (uint8_t idx = 0; idx < numItems; idx++) {
-        uint8_t pageCount = 0;
-        CHECK_PARSER_ERR(parser_getItem( idx, tmpKey, sizeof(tmpKey), tmpVal, sizeof(tmpVal), 0, &pageCount))
-    }
-
-    return parser_ok;
-}
-
-parser_error_t parser_sapling_display_value(uint64_t value, char *outVal,
-                                            uint16_t outValLen, uint8_t pageIdx,
-                                            uint8_t *pageCount) {
-    char tmpBuffer[100];
-    fpuint64_to_str(tmpBuffer, sizeof(tmpBuffer), value, 8);
-    pageString(outVal, outValLen, tmpBuffer, pageIdx, pageCount);
-    return parser_ok;
-}
-
-parser_error_t parser_sapling_display_address_t(const uint8_t *addr, char *outVal,
-                                                uint16_t outValLen, uint8_t pageIdx,
-                                                uint8_t *pageCount) {
-    MEMZERO(outVal, outValLen);
-
-    uint8_t address[VERSION_SIZE + CX_RIPEMD160_SIZE + CX_SHA256_SIZE];
-    address[0] = VERSION_P2PKH >> 8;
-    address[1] = VERSION_P2PKH & 0xFF;
-    MEMCPY(address + VERSION_SIZE, addr + 4, CX_RIPEMD160_SIZE);
-
-    cx_hash_sha256(address,
-                   VERSION_SIZE + CX_RIPEMD160_SIZE,
-                   address + VERSION_SIZE + CX_RIPEMD160_SIZE,
-                   CX_SHA256_SIZE);
-
-    cx_hash_sha256(address + VERSION_SIZE + CX_RIPEMD160_SIZE, CX_SHA256_SIZE,
-                   address + VERSION_SIZE + CX_RIPEMD160_SIZE, CX_SHA256_SIZE);
-
-    uint8_t tmpBuffer[60];
-    size_t outLen = sizeof(tmpBuffer);
-
-    int err = encode_base58(address, VERSION_SIZE + CX_RIPEMD160_SIZE + CHECKSUM_SIZE, tmpBuffer, &outLen);
-    if (err != 0) {
-        return parser_unexpected_error;
-    }
-
-    pageString(outVal, outValLen, (char *) tmpBuffer, pageIdx, pageCount);
-    return parser_ok;
-}
-
-parser_error_t parser_sapling_display_address_s(uint8_t *div, uint8_t *pkd, char *outVal,
-                                                uint16_t outValLen, uint8_t pageIdx,
-                                                uint8_t *pageCount) {
-
-    uint8_t address[DIV_SIZE + PKD_SIZE];
-    MEMCPY(address, div, DIV_SIZE);
-    MEMCPY(address + DIV_SIZE, pkd, PKD_SIZE);
-    char tmpBuffer[100];
-    bech32EncodeFromBytes(tmpBuffer, sizeof(tmpBuffer),
-                          BECH32_HRP,
-                          address,
-                          sizeof(address),
-                          1, BECH32_ENCODING_BECH32);
-    pageString(outVal, outValLen, tmpBuffer, pageIdx, pageCount);
     return parser_ok;
 }
 

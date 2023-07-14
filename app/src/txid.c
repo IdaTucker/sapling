@@ -4,7 +4,6 @@
 #include "os.h"
 #include "constants.h"
 #include "cx.h"
-#include "nvdata.h"
 #include "sighash.h"
 #include "index_sapling.h"
 #include "index_NU5.h"

@@ -35,8 +35,6 @@ typedef struct {
     uint8_t div[11];
 } parser_addr_div_t;
 
-parser_error_t parser_sapling_path_with_div(const uint8_t *data, size_t dataLen, parser_addr_div_t *prs);
-parser_error_t parser_sapling_path(const uint8_t *data, size_t dataLen, uint32_t *p);
 
 void view_tx_state();
 

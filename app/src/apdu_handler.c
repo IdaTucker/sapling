@@ -31,7 +31,6 @@
 #include "zcash_apdu_errors.h"
 
 #include "parser.h"
-#include "nvdata.h"
 
 #include "view_internal.h"
 

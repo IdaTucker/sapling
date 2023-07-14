@@ -21,7 +21,6 @@
 #include "base58.h"
 #include "rslib.h"
 #include "bech32.h"
-#include "nvdata.h"
 #include "sighash.h"
 #include "txid.h"
 #include "index_sapling.h"
